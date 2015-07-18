@@ -1,6 +1,6 @@
 ﻿module.exports = {
 
-    RabbitMqServerAddress:      '192.168.0.18',
+    RabbitMqServerAddress:      'localhost',
     RabbitMqServerPort:         5672,
 
     RabbitMqServerUsername:     'guest',
