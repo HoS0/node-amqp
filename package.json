@@ -8,11 +8,17 @@
   },
   "main": "app.js",
   "author": {
-    "name": "ali",
-    "email": ""
+    "name": "ali"
   },
   "dependencies": {
     "guid": "0.0.12",
     "node-amqp": "git+https://bitbucket.org/LightningCart/node-amqp.git"
-  }
+  },
+  "gitHead": "35aa74e90c25c163f6540cf20a2b1a69610cdbb1",
+  "readme": "﻿# AMQP-boilerplate\r\n\r\n## Message structure\r\n\r\n- id\r\n\r\n- sender\r\n\r\n        `service name` + `service id`\r\n\r\n- type\r\n    - `logger`\r\n    - `product`\r\n    - `order`\r\n    - `administration`\r\n    - `api`\r\n    - `auth`\r\n    - `Notification`\r\n\r\n- action\r\n    - `create`\r\n    - `retrieve`\r\n    - `update` \r\n    - `delete`\r\n\r\n- payload\r\n    - error ( when message is a response )\r\n        - 0\r\n        - error message\r\n\r\n- responceNeeded\r\n    - true\r\n    - false",
+  "readmeFilename": "README.md",
+  "_id": "AMQP-boilerplate@0.0.0",
+  "_shasum": "56747621d256b122e1a9f6beacfa740f1b411396",
+  "_from": "..\\..\\..\\..\\AppData\\Local\\Temp\\npm-6224-990a95a8\\git-cache-b7f563aec330\\35aa74e90c25c163f6540cf20a2b1a69610cdbb1",
+  "_resolved": "git+https://github.com/HoS0/node-amqp.git#35aa74e90c25c163f6540cf20a2b1a69610cdbb1"
 }
