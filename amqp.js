@@ -125,9 +125,6 @@ module.exports = {
 
                         q.subscribe(function (message, headers, deliveryInfo, messageObject) {
                             if (message) {
-                                console.log("--------------------");
-                                console.log(message);
-                                console.log("--------------------");
                                 var found = false;
                                 pendingRequests.forEach(function (pendingRequest) {
                                     if (pendingRequest.id.value === message.id) {
