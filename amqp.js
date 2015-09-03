@@ -87,7 +87,7 @@ var _sendMessage = function (serviceName, message, callback) {
         };
         
         return connection.exchange(service, exchangeOption, function (exchange) {
-            //publishingExchanges.push(exchange);
+            publishingExchanges.push(exchange);
             return publishMessage(exchange, processId, message, callback);
         });
     }
