@@ -1,4 +1,4 @@
-﻿var amqp = require('amqp');
+var amqp = require('amqp');
 var Guid = require('guid');
 var globalConstant = require('./src/globalConstant');
 
@@ -23,6 +23,7 @@ var connection = amqp.createConnection(connectionOption);
 var isConnected = false;
 var hostService;
 var uniqueGuid = Guid.create();
+var responceRequestFunction = null;
 
 connection.on('ready', function () {
     isConnected = true;
@@ -124,25 +125,35 @@ module.exports = {
 
                         q.subscribe(function (message, headers, deliveryInfo, messageObject) {
                             if (message) {
+                                console.log("--------------------");
+                                console.log(message);
+                                console.log("--------------------");
+                                var found = false;
                                 pendingRequests.forEach(function (pendingRequest) {
                                     if (pendingRequest.id.value === message.id) {
                                         
                                         var index = pendingRequests.indexOf(pendingRequest);
                                         pendingRequests.splice(index, 1);
                                         
-                                        if (pendingRequest.callback)
+                                        if (pendingRequest.callback) {
+                                            found = true;
                                             pendingRequest.callback(message);
+                                        }
                                     }
                                 });
+
+                                if(found === false && responceRequestFunction)
+                                    responceRequestFunction(message);
                             }
                         });
-
                     });
                 });
             });
         });
     },
     CreateRequestQueue: function (serviceName, responceRequest) {
+        responceRequestFunction = responceRequest;
+
         serviceName += "." + uniqueGuid;
         hostService = serviceName;
         var connection = amqp.createConnection(connectionOption);
