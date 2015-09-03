@@ -126,15 +126,18 @@ module.exports = {
 
                         q.subscribe(function (message, headers, deliveryInfo, messageObject) {
                             if (message) {
-                                
+
                                 var found = false;
 
+                                var msgToDelIndexes = [];
+
                                 findPendingRequest = function (pendingRequest) {
-                                    if (pendingRequest.id.value === message.id) {
+
+                                    if (found !== true && pendingRequest.id.value === message.id) {
                                         
                                         var index = pendingRequests.indexOf(pendingRequest);
-                                        pendingRequests.splice(index, 1);
-                                        
+                                        msgToDelIndexes.push(index);
+
                                         if (pendingRequest.callback) {
                                             found = true;
                                             pendingRequest.callback(message);
@@ -142,9 +145,21 @@ module.exports = {
                                     }
                                 }
 
-                                async.each(pendingRequests, findPendingRequest, function(err){
-                                    if(found === false && responceRequestFunction)
-                                        responceRequestFunction(message);
+                                async.each(pendingRequests, function(file, callback) {
+                                    findPendingRequest(file);
+                                    callback();
+
+                                }, function(err){
+                                    if( err ) {
+                                    } else {
+
+                                        if(found === false && responceRequestFunction)
+                                            responceRequestFunction(message);
+
+                                        msgToDelIndexes.forEach(function(msg) {
+                                            pendingRequests.splice(msg, 1);
+                                        });
+                                    }
                                 });
                             }
                         });
