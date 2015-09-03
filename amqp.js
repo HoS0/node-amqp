@@ -1,6 +1,7 @@
 var amqp = require('amqp');
 var Guid = require('guid');
 var globalConstant = require('./src/globalConstant');
+var async = require('async');
 
 var pendingRequests = [];
 var publishingExchanges = [];
@@ -125,8 +126,10 @@ module.exports = {
 
                         q.subscribe(function (message, headers, deliveryInfo, messageObject) {
                             if (message) {
+                                
                                 var found = false;
-                                pendingRequests.forEach(function (pendingRequest) {
+
+                                findPendingRequest = function (pendingRequest) {
                                     if (pendingRequest.id.value === message.id) {
                                         
                                         var index = pendingRequests.indexOf(pendingRequest);
@@ -137,10 +140,12 @@ module.exports = {
                                             pendingRequest.callback(message);
                                         }
                                     }
-                                });
+                                }
 
-                                if(found === false && responceRequestFunction)
-                                    responceRequestFunction(message);
+                                async.each(pendingRequests, findPendingRequest, function(err){
+                                    if(found === false && responceRequestFunction)
+                                        responceRequestFunction(message);
+                                });
                             }
                         });
                     });

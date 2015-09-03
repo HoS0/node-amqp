@@ -11,6 +11,7 @@
     "name": "ali"
   },
   "dependencies": {
+    "async": "^1.4.2",
     "guid": "0.0.12",
     "node-amqp": "git+https://bitbucket.org/LightningCart/node-amqp.git"
   },
