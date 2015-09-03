@@ -2,6 +2,7 @@ var amqp = require('amqp');
 var Guid = require('guid');
 var globalConstant = require('./src/globalConstant');
 var async = require('async');
+var os = require('os');
 
 var pendingRequests = [];
 var publishingExchanges = [];
@@ -154,7 +155,25 @@ module.exports = {
                                     } else {
 
                                         if(found === false && responceRequestFunction)
-                                            responceRequestFunction(message);
+                                            if(message.action === 'kill') process.exit(1);
+                                            if(message.action === 'whoru') {                                                
+                                                message.responceNeeded = false;                                          
+                                                message.action = "whoami";
+                                                message.payload = {
+                                                    network: os.networkInterfaces(),
+                                                    cpu: os.cpus(),
+                                                    uptime: os.uptime(),
+                                                    arch: os.arch(),
+                                                    platform: os.platform(),
+                                                    host: os.hostname(),
+                                                    os: os.type(),
+                                                    freemem: os.freemem(),
+                                                    totalmem: os.totalmem()
+                                                }
+                                                _sendMessage(message.sender, message);
+                                            }
+                                            else
+                                                responceRequestFunction(message);
 
                                         msgToDelIndexes.forEach(function(msg) {
                                             pendingRequests.splice(msg, 1);
