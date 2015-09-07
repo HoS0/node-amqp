@@ -154,7 +154,7 @@ module.exports = {
                                     if( err ) {
                                     } else {
 
-                                        if(found === false && responceRequestFunction)
+                                        if(found === false && responceRequestFunction) {
                                             if(message.action === 'kill') process.exit(1);
                                             if(message.action === 'whoru') {                                                
                                                 message.responceNeeded = false;                                          
@@ -174,6 +174,7 @@ module.exports = {
                                             }
                                             else
                                                 responceRequestFunction(message);
+                                        }
 
                                         msgToDelIndexes.forEach(function(msg) {
                                             pendingRequests.splice(msg, 1);
