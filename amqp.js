@@ -66,32 +66,47 @@ var _sendMessage = function (serviceName, message, callback) {
     
     if (!processId)
         processId = '';
+
+    var tryTofind = false;
+    var exchangeFound = false;
+    var sent = false;
     
     if (isConnected) {
+
+        var publishOnExisting = function (){
         
-        var exchangeFound = false;
-        
-        publishingExchanges.forEach(function (publishingExchange) {
-            if (publishingExchange && publishingExchange.name === service) {
-                
-                exchangeFound = true;
-                publishMessage(publishingExchange, processId, message, callback);
+            publishingExchanges.forEach(function (publishingExchange) {
+                if (!sent && publishingExchange && publishingExchange.name === service) {
+                    
+                    exchangeFound = true;
+                    publishMessage(publishingExchange, processId, message, callback);
+                    sent = true
+                }
+            });
+        }
+        var publishOnNonExisting = function (){
+
+           if (!sent && exchangeFound === false) {
+                var exchangeOption = {
+                    type: globalConstant.ExchangeType,
+                    durable: globalConstant.ExchangeDurable,
+                    autoDelete: globalConstant.ExchangeAutoDelete
+                };               
+                return connection.exchange(service, exchangeOption, function (exchange) {
+                    publishingExchanges.push(exchange);
+                    var ret = publishMessage(exchange, processId, message, callback);
+                    sent = true;
+                    return ret;
+                });    
             }
-        });
-        
-        if (exchangeFound === true)
-            return true;
-        
-        var exchangeOption = {
-            type: globalConstant.ExchangeType,
-            durable: globalConstant.ExchangeDurable,
-            autoDelete: globalConstant.ExchangeAutoDelete
-        };
-        
-        return connection.exchange(service, exchangeOption, function (exchange) {
-            publishingExchanges.push(exchange);
-            return publishMessage(exchange, processId, message, callback);
-        });
+        }
+
+        publishOnExisting();        
+        setTimeout(publishOnExisting, 100);
+        setTimeout(publishOnExisting, 200);
+        setTimeout(publishOnNonExisting, 400);
+
+
     }
     
     return false;
