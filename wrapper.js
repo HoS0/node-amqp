@@ -2,13 +2,13 @@
 
 var
   amqp = require('./amqp'),
-  EventEmitter require('events').EventEmitter,
-  Promise = require('bluebird');
+  EventEmitter = require('events').EventEmitter;
 
 var Wrapper = new EventEmitter();
 
 Wrapper.initialize = function(serviceName, config) {
   var self = this;
+  config = config || {};
   /* Override config */
   process.env.RABBIT_URL = config.host || process.env.RABBIT_URL;
   process.env.RABBIT_PORT = config.port || process.env.RABBIT_PORT;
@@ -19,7 +19,6 @@ Wrapper.initialize = function(serviceName, config) {
 
   amqp.Initialize(serviceName, function() {
     self.emit('ready', {});
-    resolve(Wrapper);
   });
 };
 
@@ -61,6 +60,10 @@ Wrapper.sendMessage = function(to, message, callback) {
 
     return callback(null, response.payload);
   });
+};
+
+Wrapper.getOld = function(){
+  return amqp;
 };
 
 module.exports = Wrapper;
