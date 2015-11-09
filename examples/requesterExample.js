@@ -1,6 +1,6 @@
 ﻿var amqp = require('../amqp');
 
-var name = 'product';
+var name = 'customer';
 
 amqp.Initialize(name);
 
@@ -15,9 +15,9 @@ setInterval(function () {
         },
         responceNeeded: false
     };
+    
+    //amqp.SendMessage('logger', msg);
 
-    amqp.SendMessage(name, msg);
 
-
-    // amqp.Log('info', 'something');
-}, 20);
+    amqp.Log('info', 'something');
+}, 20);  
