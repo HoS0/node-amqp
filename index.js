@@ -1,1 +1,1 @@
-module.exports = require('./wrapper');
+module.exports = require('./amqp');
