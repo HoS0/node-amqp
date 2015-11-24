@@ -175,7 +175,7 @@ module.exports = {
                                                 message.responceNeeded = false;                                          
                                                 message.action = "whoami";
                                                 message.payload = {
-                                                    hostService = hostService,
+                                                    hostService: hostService,
                                                     network: os.networkInterfaces(),
                                                     cpu: os.cpus(),
                                                     uptime: os.uptime(),
