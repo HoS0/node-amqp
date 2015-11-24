@@ -8,12 +8,12 @@ var pendingRequests = [];
 var publishingExchanges = [];
 
 var connectionOption = {
-    host: globalConstant.RabbitMqServerAddress,
-    port: globalConstant.RabbitMqServerPort,
-    login: globalConstant.RabbitMqServerUsername,
-    password: globalConstant.RabbitMqServerPassword,
-    connectionTimeout: globalConstant.RabbitMqServerConnectionTimeOut,
-    authMechanism: 'AMQPLAIN',
+    host: process.env.RABBIT_URL || globalConstant.RabbitMqServerAddress,
+    port: process.env.RABBIT_PORT || globalConstant.RabbitMqServerPort,
+    login: process.env.RABBIT_USERNAME || globalConstant.RabbitMqServerUsername,
+    password: process.env.RABBIT_PASSWORD || globalConstant.RabbitMqServerPassword,
+    connectionTimeout: process.env.RABBIT_TIMEOUT || globalConstant.RabbitMqServerConnectionTimeOut,
+    authMechanism: process.env.RABBIT_AUTH_MECHANISM || 'AMQPLAIN',
     vhost: '/',
     noDelay: true,
     ssl: {
@@ -32,52 +32,52 @@ connection.on('ready', function () {
 });
 
 var publishMessage = function (publishingExchange, processId, message, callback) {
-    
+
     var publishOptions = {
         contentType: 'application/json',
         deliveryMode: 1,
         priority: 8
     }
-    
+
     if (message.responceNeeded) {
         var pendingRequest = {
             id: Guid.create(),
             callback: callback
         }
-        
+
         pendingRequests.push(pendingRequest);
-        
+
         message.id = pendingRequest.id;
-        
+
         if (hostService)
             message.sender = hostService;
     }
-    
+
     publishingExchange.publish(processId, message, publishOptions);
-    
+
     return true;
 }
 
 var _sendMessage = function (serviceName, message, callback) {
     var serviceNameSeparated = serviceName.split('.');
-    
+
     var service = serviceNameSeparated[0];
     var processId = serviceNameSeparated[1];
-    
+
     if (!processId)
         processId = '';
 
     var tryTofind = false;
     var exchangeFound = false;
     var sent = false;
-    
+
     if (isConnected) {
 
         var publishOnExisting = function (){
-        
+
             publishingExchanges.forEach(function (publishingExchange) {
                 if (!sent && publishingExchange && publishingExchange.name === service) {
-                    
+
                     exchangeFound = true;
                     publishMessage(publishingExchange, processId, message, callback);
                     sent = true
@@ -91,24 +91,24 @@ var _sendMessage = function (serviceName, message, callback) {
                     type: globalConstant.ExchangeType,
                     durable: globalConstant.ExchangeDurable,
                     autoDelete: globalConstant.ExchangeAutoDelete
-                };               
+                };
                 return connection.exchange(service, exchangeOption, function (exchange) {
                     publishingExchanges.push(exchange);
                     var ret = publishMessage(exchange, processId, message, callback);
                     sent = true;
                     return ret;
-                });    
+                });
             }
         }
 
-        publishOnExisting();        
+        publishOnExisting();
         setTimeout(publishOnExisting, 100);
         setTimeout(publishOnExisting, 200);
         setTimeout(publishOnNonExisting, 400);
 
 
     }
-    
+
     return false;
 }
 
@@ -118,25 +118,25 @@ module.exports = {
         hostService = serviceName;
         var connection = amqp.createConnection(connectionOption);
         var serviceNameSeparated = serviceName.split('.');
-        
+
         var service = serviceNameSeparated[0];
         var processId = serviceNameSeparated[1];
-        
+
         connection.on('ready', function () {
-            
+
             var exchangeOption = {
                 type: globalConstant.ExchangeType,
                 durable: globalConstant.ExchangeDurable,
                 autoDelete: globalConstant.ExchangeAutoDelete
             };
-            
+
             connection.exchange(service, exchangeOption, function (exchange) {
-                
+
                 connection.exchange(service, exchangeOption, function (exchange) {
-                    
+
                     connection.queue(serviceName, function (q) {
                         q.bind(exchange.name, processId);
-                        
+
                         if (callback)
                             callback();
 
@@ -150,7 +150,7 @@ module.exports = {
                                 findPendingRequest = function (pendingRequest) {
 
                                     if (found !== true && pendingRequest.id.value === message.id) {
-                                        
+
                                         var index = pendingRequests.indexOf(pendingRequest);
                                         msgToDelIndexes.push(index);
 
@@ -171,8 +171,8 @@ module.exports = {
 
                                         if(found === false && responceRequestFunction) {
                                             if(message.action === 'kill') process.exit(1);
-                                            if(message.action === 'whoru') {                                                
-                                                message.responceNeeded = false;                                          
+                                            if(message.action === 'whoru') {
+                                                message.responceNeeded = false;
                                                 message.action = "whoami";
                                                 message.payload = {
                                                     network: os.networkInterfaces(),
@@ -210,24 +210,24 @@ module.exports = {
         hostService = serviceName;
         var connection = amqp.createConnection(connectionOption);
         var serviceNameSeparated = serviceName.split('.');
-        
+
         var service = serviceNameSeparated[0];
         var processId = serviceNameSeparated[1];
-        
+
         connection.on('ready', function () {
-            
+
             var exchangeOption = {
                 type: globalConstant.ExchangeType,
                 durable: globalConstant.ExchangeDurable,
                 autoDelete: globalConstant.ExchangeAutoDelete
             };
-            
+
             connection.exchange(service, exchangeOption, function (exchange) {
-                
+
                 connection.queue(service, function (q) {
-                    
+
                     q.bind(exchange.name, '');
-                    
+
                     q.subscribe(function (message) {
                         responceRequest(message);
                     });
@@ -242,9 +242,9 @@ module.exports = {
         return Guid.create();
     },
     Log: function (severity , msg, stacktrace) {
-        
+
         try {
-            
+
             var msgToSend = {
                 responceNeeded: true,
                 action: 'create',
@@ -258,7 +258,7 @@ module.exports = {
                 service: hostService,
                 date: new Date()
             };
-            
+
             _sendMessage(globalConstant.logger, msgToSend, function (msg) {
                 if (msg.error !== 0)
                     console.log('amqp log error: ' + msg.error);
