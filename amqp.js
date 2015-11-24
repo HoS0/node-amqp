@@ -174,8 +174,8 @@ module.exports = {
                                             if(message.action === 'whoru') {                                                
                                                 message.responceNeeded = false;                                          
                                                 message.action = "whoami";
-                                                message.sender = hostService;
                                                 message.payload = {
+                                                    hostService = hostService,
                                                     network: os.networkInterfaces(),
                                                     cpu: os.cpus(),
                                                     uptime: os.uptime(),
