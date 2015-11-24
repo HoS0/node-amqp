@@ -8,12 +8,12 @@ var pendingRequests = [];
 var publishingExchanges = [];
 
 var connectionOption = {
-    host: globalConstant.RabbitMqServerAddress,
-    port: globalConstant.RabbitMqServerPort,
-    login: globalConstant.RabbitMqServerUsername,
-    password: globalConstant.RabbitMqServerPassword,
-    connectionTimeout: globalConstant.RabbitMqServerConnectionTimeOut,
-    authMechanism: 'AMQPLAIN',
+    host: process.env.RABBIT_URL || globalConstant.RabbitMqServerAddress,
+    port: process.env.RABBIT_PORT || globalConstant.RabbitMqServerPort,
+    login: process.env.RABBIT_USERNAME || globalConstant.RabbitMqServerUsername,
+    password: process.env.RABBIT_PASSWORD || globalConstant.RabbitMqServerPassword,
+    connectionTimeout: process.env.RABBIT_TIMEOUT || globalConstant.RabbitMqServerConnectionTimeOut,
+    authMechanism: process.env.RABBIT_AUTH_MECHANISM || 'AMQPLAIN',
     vhost: '/',
     noDelay: true,
     ssl: {
