@@ -1,12 +1,12 @@
 ﻿module.exports = {
 
-    RabbitMqServerAddress:      'localhost',
-    RabbitMqServerPort:         5672,
+    RabbitMqServerAddress:      process.env.RABBIT_URL || 'localhost',
+    RabbitMqServerPort:         process.env.RABBIT_PORT || 5672,
 
-    RabbitMqServerUsername:     'guest',
-    RabbitMqServerPassword:     'guest',
+    RabbitMqServerUsername:     process.env.RABBIT_USERNAME || 'guest',
+    RabbitMqServerPassword:     process.env.RABBIT_PASSWORD || 'guest',
 
-    RabbitMqServerConnectionTimeOut: 10000,
+    RabbitMqServerConnectionTimeOut: process.env.RABBIT_TIMEOUT || 10000,
     
     logger: 'logger',
 
